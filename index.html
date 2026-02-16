@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ALii GOLD - Premium Do'kon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* UMUMIY STILLAR */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --emerald-dark: #06281E;
+            --emerald-mid: #0B3D2E;
+            --gold: #D4AF37;
+            --gold-light: #F4E4A6;
+            --white: #FFFFFF;
+            --cream: #FAF8F3;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --info: #3b82f6;
+        }
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: var(--emerald-dark);
+            color: var(--white);
+            padding-bottom: 80px;
+        }
+        
+        /* HEADER */
+        .header {
+            background: rgba(6, 40, 30, 0.95);
+            padding: 1rem 4%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            backdrop-filter: blur(5px);
+        }
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--gold);
+            cursor: pointer;
+        }
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .icon-btn {
+            background: none;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: 0.3s;
+        }
+        .icon-btn:hover {
+            background: var(--gold);
+            color: var(--emerald-dark);
+        }
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-family: sans-serif;
+        }
+
+        /* KATEGORIYALAR NAVIGATSIYASI */
+        .category-nav {
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 15px 4%;
+            background: var(--emerald-mid);
+            scrollbar-width: none;
+        }
+        .category-nav::-webkit-scrollbar { display: none; }
+        
+        .cat-btn {
+            background: transparent;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            color: var(--cream);
+            padding: 8px 16px;
+            border-radius: 20px;
+            white-space: nowrap;
+            cursor: pointer;
+            font-family: 'Playfair Display', serif;
+            transition: 0.3s;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            background: var(--gold);
+            color: var(--emerald-dark);
+            border-color: var(--gold);
+        }
+
+        /* MAHSULOTLAR GRIDI */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 20px 4%;
+        }
+        @media (min-width: 768px) {
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; }
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+        }
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: #000;
+        }
+        .product-info {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-cat {
+            font-size: 0.8rem;
+            color: var(--gold-light);
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+        .product-title {
+            font-size: 1.1rem;
+            color: var(--white);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+        .product-price {
+            font-size: 1.2rem;
+            color: var(--gold);
+            font-weight: bold;
+            margin-top: auto;
+        }
+        .add-btn {
+            width: 100%;
+            background: linear-gradient(45deg, var(--gold), #b8941f);
+            border: none;
+            padding: 10px;
+            color: var(--emerald-dark);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .add-btn:active { transform: scale(0.98); }
+
+        /* MODAL (SAVAT & ADMIN) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: var(--emerald-mid);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 15px;
+            border: 1px solid var(--gold);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* SAVAT & CHECKOUT */
+        .cart-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            align-items: center;
+        }
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .cart-item-info { flex: 1; }
+        .remove-btn {
+            color: var(--danger);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .customer-form {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px dashed var(--gold);
+        }
+
+        /* ADMIN PANEL UI */
+        .admin-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+        }
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--cream);
+            padding: 10px;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            color: var(--gold);
+            border-bottom: 2px solid var(--gold);
+        }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--gold-light); }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212,175,55,0.3);
+            color: white;
+            border-radius: 5px;
+        }
+        .file-upload-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: 2px dashed var(--gold);
+            text-align: center;
+            color: var(--gold);
+            cursor: pointer;
+            border-radius: 5px;
+            background: rgba(0,0,0,0.2);
+        }
+        .file-upload-btn:hover {
+            background: rgba(212,175,55,0.1);
+        }
+        .image-preview-box {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .image-preview-box img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 5px;
+            border: 1px solid var(--gold);
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--gold);
+            color: var(--emerald-dark);
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .submit-btn.update {
+            background: var(--info);
+            color: white;
+        }
+
+        /* ADMIN LIST ITEM */
+        .admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-edit {
+            background: var(--info);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* BUYURTMALAR KARTASI */
+        .order-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--gold-light);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        .order-header {
+            border-bottom: 1px dashed rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .customer-details {
+            color: var(--gold);
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .order-date {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        .order-items-list {
+            list-style: none;
+            margin-left: 0;
+        }
+        .order-items-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .order-total {
+            color: var(--gold);
+            font-weight: bold;
+            text-align: right;
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo" onclick="renderProducts('all')">ALii GOLD</div>
+        <div class="header-controls">
+            <button class="icon-btn" onclick="openAdminModal()">
+                🔑
+            </button>
+            <button class="icon-btn" onclick="openCartModal()">
+                🛒
+                <span class="cart-badge" id="cart-count">0</span>
+            </button>
+        </div>
+    </header>
+
+    <nav class="category-nav">
+        <button class="cat-btn active" onclick="filterCategory('all', this)">Barchasi</button>
+        <button class="cat-btn" onclick="filterCategory('uzuk', this)">Uzuklar</button>
+        <button class="cat-btn" onclick="filterCategory('komplekt', this)">Komplektlar</button>
+        <button class="cat-btn" onclick="filterCategory('braslet', this)">Brasletlar</button>
+        <button class="cat-btn" onclick="filterCategory('sepochka', this)">Sepochkalar</button>
+        <button class="cat-btn" onclick="filterCategory('qattiq_braslet', this)">Qattiq brasletlar</button>
+        <button class="cat-btn" onclick="filterCategory('detskiy_zirak', this)">Detskiy zikalar</button>
+        <button class="cat-btn" onclick="filterCategory('detskiy_braslet', this)">Detskiy brasletlar</button>
+    </nav>
+
+    <main id="main-content">
+        <div class="products-grid" id="products-container">
+            </div>
+    </main>
+
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sizning Savatingiz</h3>
+                <button class="close-btn" onclick="closeModal('cart-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="cart-items-container">
+                    <p style="text-align: center; opacity: 0.7;">Savatingiz bo'sh</p>
+                </div>
+                
+                <div class="customer-form" id="checkout-form" style="display: none;">
+                    <h4 style="color:var(--gold); margin-bottom:10px;">Buyurtmachi ma'lumotlari:</h4>
+                    <div class="form-group">
+                        <input type="text" id="cust-name" class="form-input" placeholder="Ismingiz" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" id="cust-phone" class="form-input" placeholder="+998 90 123 45 67" required>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <span>Jami:</span>
+                        <span id="cart-total" style="color: var(--gold); font-weight: bold;">0 so'm</span>
+                    </div>
+                    <button class="submit-btn" onclick="checkout()">Buyurtma berish</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="admin-login-modal">
+        <div class="modal-content" style="max-width: 350px;">
+            <div class="modal-header">
+                <h3>Admin Kirish</h3>
+                <button class="close-btn" onclick="closeModal('admin-login-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="adminLogin(event)">
+                    <div class="form-group">
+                        <label>Parol</label>
+                        <input type="password" id="admin-pass-input" class="form-input" placeholder="Parolni kiriting">
+                    </div>
+                    <button type="submit" class="submit-btn">Kirish</button>
+                    <p id="login-error" style="color: var(--danger); font-size: 0.9rem; margin-top: 10px; display: none;">Parol noto'g'ri!</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="admin-panel-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>Admin Panel</h3>
+                <button class="close-btn" onclick="closeModal('admin-panel-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="admin-tabs">
+                    <button class="tab-btn active" onclick="switchAdminTab('products')">Mahsulotlar</button>
+                    <button class="tab-btn" onclick="switchAdminTab('form')">Qo'shish / Tahrirlash</button>
+                    <button class="tab-btn" onclick="switchAdminTab('orders')">Buyurtmalar</button>
+                </div>
+
+                <div id="admin-tab-products">
+                    <div id="admin-products-list" style="display: grid; gap: 10px;"></div>
+                </div>
+
+                <div id="admin-tab-form" style="display: none;">
+                    <h4 id="form-title" style="margin-bottom:15px; color:var(--gold);">Yangi mahsulot qo'shish</h4>
+                    <form onsubmit="handleProductSubmit(event)">
+                        <input type="hidden" id="edit-id">
+                        <div class="form-group">
+                            <label>Mahsulot nomi</label>
+                            <input type="text" id="prod-name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Narxi (so'm)</label>
+                            <input type="number" id="prod-price" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Kategoriya</label>
+                            <select id="prod-cat" class="form-select">
+                                <option value="uzuk">Uzuklar</option>
+                                <option value="komplekt">Komplektlar</option>
+                                <option value="braslet">Brasletlar</option>
+                                <option value="sepochka">Sepochkalar</option>
+                                <option value="qattiq_braslet">Qattiq brasletlar</option>
+                                <option value="detskiy_zirak">Detskiy zikalar</option>
+                                <option value="detskiy_braslet">Detskiy brasletlar</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Rasm yuklash (Gallereyadan)</label>
+                            <label class="file-upload-btn">
+                                📸 Rasm tanlash
+                                <input type="file" id="prod-file" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                            </label>
+                            <div class="image-preview-box">
+                                <img id="img-preview" src="" alt="Preview">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" id="form-submit-btn" class="submit-btn">Bazaga qo'shish</button>
+                        <button type="button" onclick="resetForm()" style="width:100%; margin-top:10px; background:transparent; border:1px solid #aaa; padding:10px; color:#aaa; border-radius:5px; cursor:pointer;">Bekor qilish</button>
+                    </form>
+                </div>
+
+                <div id="admin-tab-orders" style="display: none;">
+                    <div id="admin-orders-list">
+                        </div>
+                    <button onclick="clearOrders()" style="margin-top:20px; background:var(--danger); border:none; color:white; padding:10px; border-radius:5px; cursor:pointer;">Tarixni tozalash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- MA'LUMOTLAR BAZASI ---
+        const ADMIN_PASS = "aliigoldn1";
+        
+        // Asosiy rasm o'zgaruvchisi (yuklangan rasm shu yerda turadi)
+        let currentImageBase64 = "";
+
+        let products = JSON.parse(localStorage.getItem('alii_products')) || [
+            { id: 1, name: "Brilliant Uzuk", price: 3500000, category: "uzuk", image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400" }
+        ];
+
+        let cart = JSON.parse(localStorage.getItem('alii_cart')) || [];
+        let orders = JSON.parse(localStorage.getItem('alii_orders')) || [];
+
+        // --- ASOSIY FUNKSIYALAR ---
+        window.onload = () => {
+            renderProducts('all');
+            updateCartCount();
+        };
+
+        function saveToLocal() {
+            try {
+                localStorage.setItem('alii_products', JSON.stringify(products));
+                localStorage.setItem('alii_cart', JSON.stringify(cart));
+                localStorage.setItem('alii_orders', JSON.stringify(orders));
+            } catch (e) {
+                alert("Xotira to'ldi! Iltimos, ba'zi mahsulotlarni o'chiring yoki rasm hajmini kichraytiring.");
+            }
+        }
+
+        function renderProducts(filter) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+
+            const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+
+            if(filtered.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 20px;">Hozircha bu bo\'limda mahsulot yo\'q.</p>';
+                return;
+            }
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${p.image || 'https://via.placeholder.com/300x300?text=No+Image'}" class="product-img" alt="${p.name}">
+                    <div class="product-info">
+                        <span class="product-cat">${getCatName(p.category)}</span>
+                        <h3 class="product-title">${p.name}</h3>
+                        <div class="product-price">${formatPrice(p.price)} so'm</div>
+                        <button class="add-btn" onclick="addToCart(${p.id})">Savatga qo'shish</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat, btn) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts(cat);
+        }
+
+        function getCatName(slug) {
+            const names = {
+                'uzuk': 'Uzuklar', 'komplekt': 'Komplektlar', 'braslet': 'Brasletlar',
+                'sepochka': 'Sepochkalar', 'qattiq_braslet': 'Qattiq brasletlar',
+                'detskiy_zirak': 'Detskiy zikalar', 'detskiy_braslet': 'Detskiy brasletlar'
+            };
+            return names[slug] || slug;
+        }
+
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+
+        // --- RASM YUKLASH VA KICHRAYTIRISH (SIQISH) ---
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Rasmni kichraytirish (Canvas yordamida)
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Maksimal o'lcham (juda katta bo'lmasligi uchun)
+                    const maxWidth = 500;
+                    const scaleSize = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scaleSize;
+
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    // Sifatni 70% ga tushirish (xotirani tejash uchun)
+                    currentImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    // Preview ko'rsatish
+                    const preview = document.getElementById('img-preview');
+                    preview.src = currentImageBase64;
+                    preview.style.display = 'inline-block';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- SAVAT FUNKSIYALARI ---
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            saveToLocal();
+            updateCartCount();
+            
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Qo'shildi ✓";
+            btn.style.background = "var(--success)";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = "";
+            }, 1000);
+        }
+
+        function updateCartCount() {
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        function openCartModal() {
+            const modal = document.getElementById('cart-modal');
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total');
+            const form = document.getElementById('checkout-form');
+            
+            container.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7;">Savatingiz bo\'sh</p>';
+                form.style.display = 'none';
+            } else {
+                form.style.display = 'block';
+                cart.forEach((item, index) => {
+                    total += parseInt(item.price);
+                    const div = document.createElement('div');
+                    div.className = 'cart-item';
+                    div.innerHTML = `
+                        <img src="${item.image}" alt="">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <p>${formatPrice(item.price)} so'm</p>
+                        </div>
+                        <button class="remove-btn" onclick="removeFromCart(${index})">&times;</button>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            totalEl.innerText = formatPrice(total) + " so'm";
+            modal.style.display = 'flex';
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            saveToLocal();
+            updateCartCount();
+            openCartModal();
+        }
+
+        function checkout() {
+            if(cart.length === 0) return alert("Savat bo'sh!");
+
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+
+            if(!name || !phone) {
+                alert("Iltimos, ismingiz va telefon raqamingizni kiriting!");
+                return;
+            }
+            
+            const order = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                customerName: name,
+                customerPhone: phone,
+                items: [...cart],
+                total: cart.reduce((sum, item) => sum + parseInt(item.price), 0)
+            };
+
+            orders.unshift(order);
+            cart = [];
+            document.getElementById('cust-name').value = '';
+            document.getElementById('cust-phone').value = '';
+            saveToLocal();
+            updateCartCount();
+            closeModal('cart-modal');
+            alert("Buyurtmangiz qabul qilindi! Admin tez orada aloqaga chiqadi.");
+        }
+
+        // --- ADMIN FUNKSIYALARI ---
+        function openAdminModal() {
+            if(sessionStorage.getItem('admin_logged_in')) {
+                showAdminPanel();
+            } else {
+                document.getElementById('admin-login-modal').style.display = 'flex';
+            }
+        }
+
+        function adminLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('admin-pass-input').value;
+            if(pass === ADMIN_PASS) {
+                sessionStorage.setItem('admin_logged_in', 'true');
+                closeModal('admin-login-modal');
+                document.getElementById('admin-pass-input').value = '';
+                showAdminPanel();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+
+        function showAdminPanel() {
+            const modal = document.getElementById('admin-panel-modal');
+            modal.style.display = 'flex';
+            switchAdminTab('products');
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('admin-tab-products').style.display = 'none';
+            document.getElementById('admin-tab-form').style.display = 'none';
+            document.getElementById('admin-tab-orders').style.display = 'none';
+
+            if(tabName === 'products') {
+                document.getElementById('admin-tab-products').style.display = 'block';
+                renderAdminProducts();
+            } else if(tabName === 'form') {
+                document.getElementById('admin-tab-form').style.display = 'block';
+            } else if(tabName === 'orders') {
+                document.getElementById('admin-tab-orders').style.display = 'block';
+                renderAdminOrders();
+            }
+        }
+
+        // 1. Mahsulotlarni boshqarish (List)
+        function renderAdminProducts() {
+            const list = document.getElementById('admin-products-list');
+            list.innerHTML = '';
+            products.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.className = 'admin-item';
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <img src="${p.image}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;">
+                        <div>
+                            <div style="font-weight:bold;">${p.name}</div>
+                            <div style="font-size:0.8rem; opacity:0.7">${formatPrice(p.price)} so'm</div>
+                        </div>
+                    </div>
+                    <div class="admin-actions">
+                        <button class="btn-edit" onclick="editProduct(${p.id})">✏️</button>
+                        <button class="btn-delete" onclick="deleteProduct(${index})">🗑️</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // 2. Mahsulotni Tahrirlash/Qo'shish Logikasi (FIXED)
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-id').value;
+            const name = document.getElementById('prod-name').value;
+            const price = document.getElementById('prod-price').value;
+            const cat = document.getElementById('prod-cat').value;
+            
+            // Asosiy rasm mantig'i:
+            let imgToSave = 'https://via.placeholder.com/400x400?text=No+Image'; // Agar hech narsa bo'lmasa
+
+            if (currentImageBase64 && currentImageBase64.length > 100) {
+                // 1. Agar yangi rasm yuklangan bo'lsa (yangi yoki o'zgargan)
+                imgToSave = currentImageBase64;
+            } else if (editId) {
+                // 2. Tahrirlash payti va rasm o'zgarmagan bo'lsa -> Bazadagi eski rasmni topamiz
+                const existing = products.find(p => p.id == editId);
+                if (existing) {
+                    imgToSave = existing.image;
+                }
+            }
+
+            if (editId) {
+                // Tahrirlash (Update)
+                const index = products.findIndex(p => p.id == editId);
+                if (index !== -1) {
+                    products[index] = { ...products[index], name, price, category: cat, image: imgToSave };
+                    alert("Mahsulot yangilandi!");
+                }
+            } else {
+                // Yangi qo'shish (Add)
+                const newProd = { id: Date.now(), name, price, category: cat, image: imgToSave };
+                products.push(newProd);
+                alert("Mahsulot qo'shildi!");
+            }
+
+            saveToLocal();
+            resetForm();
+            renderProducts('all');
+            switchAdminTab('products');
+        }
+
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            // Formani to'ldirish
+            document.getElementById('edit-id').value = product.id;
+            document.getElementById('prod-name').value = product.name;
+            document.getElementById('prod-price').value = product.price;
+            document.getElementById('prod-cat').value = product.category;
+            
+            // Previewni o'rnatish
+            currentImageBase64 = ""; // Reset qilamiz, toki yangi yuklamasa eskisi qolsin
+            document.getElementById('img-preview').src = product.image;
+            document.getElementById('img-preview').style.display = 'inline-block';
+
+            // UI ni o'zgartirish
+            document.getElementById('form-title').innerText = "Mahsulotni tahrirlash";
+            const btn = document.getElementById('form-submit-btn');
+            btn.innerText = "Saqlash";
+            btn.classList.add('update');
+
+            switchAdminTab('form');
+        }
+
+        function resetForm() {
+            document.querySelector('form').reset();
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-title').innerText = "Yangi mahsulot qo'shish";
+            const btn = document.getElementById('form-submit-btn');
+            btn.innerText = "Bazaga qo'shish";
+            btn.classList.remove('update');
+            
+            // Rasmni tozalash
+            currentImageBase64 = "";
+            document.getElementById('img-preview').src = "";
+            document.getElementById('img-preview').style.display = 'none';
+        }
+
+        function deleteProduct(index) {
+            if(confirm("Rostdan ham o'chirmoqchimisiz?")) {
+                products.splice(index, 1);
+                saveToLocal();
+                renderAdminProducts();
+                renderProducts('all');
+            }
+        }
+
+        // 3. Buyurtmalar
+        function renderAdminOrders() {
+            const container = document.getElementById('admin-orders-list');
+            container.innerHTML = '';
+
+            if(orders.length === 0) {
+                container.innerHTML = '<p>Buyurtmalar yo\'q.</p>';
+                return;
+            }
+
+            orders.forEach(order => {
+                let itemsHtml = '';
+                order.items.forEach(item => {
+                    itemsHtml += `<li><span>${item.name}</span> <span>${formatPrice(item.price)}</span></li>`;
+                });
+
+                const div = document.createElement('div');
+                div.className = 'order-card';
+                div.innerHTML = `
+                    <div class="order-header">
+                        <div class="customer-details">👤 ${order.customerName}</div>
+                        <div style="color:var(--gold-light)">📞 ${order.customerPhone}</div>
+                        <div class="order-date">📅 ${order.date}</div>
+                    </div>
+                    <ul class="order-items-list">${itemsHtml}</ul>
+                    <div class="order-total">Jami: ${formatPrice(order.total)} so'm</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function clearOrders() {
+            if(confirm("Barcha buyurtma tarixini o'chirmoqchimisiz?")) {
+                orders = [];
+                saveToLocal();
+                renderAdminOrders();
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+        
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
