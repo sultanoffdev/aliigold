@@ -439,7 +439,7 @@
     </header>
 
     <nav class="category-nav">
-        <button class="cat-btn active" onclick="filterCategory('all', this)">Barchasi</button>
+        <button id="nav-btn-all" class="cat-btn active" onclick="filterCategory('all', this)">Barchasi</button>
         <button class="cat-btn" onclick="filterCategory('uzuk', this)">Uzuklar</button>
         <button class="cat-btn" onclick="filterCategory('komplekt', this)">Komplektlar</button>
         <button class="cat-btn" onclick="filterCategory('braslet', this)">Brasletlar</button>
@@ -675,7 +675,6 @@
 
         // --- YANGI XABARNOMA FUNKSIYASI ---
         function showToast(message) {
-            // Agar oldin chiqqan xabar bo'lsa o'chiramiz
             const existing = document.querySelector('.toast-notification');
             if(existing) existing.remove();
 
@@ -684,20 +683,18 @@
             toast.innerHTML = message;
             document.body.appendChild(toast);
 
-            // 5 sekunddan keyin o'chadi
             setTimeout(() => {
                 toast.remove();
             }, 5000);
         }
 
-        // --- SAVATGA QO'SHISH (O'ZGARTIRILDI) ---
+        // --- SAVATGA QO'SHISH ---
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             cart.push(product);
             saveToLocal();
             updateCartCount();
             
-            // Tugmani vizual o'zgartirish
             const btn = event.target;
             const originalText = btn.innerText;
             btn.innerText = "Qo'shildi ✓";
@@ -707,7 +704,6 @@
                 btn.style.background = "";
             }, 1000);
 
-            // YANGI XABARNOMA CHIQARISH
             showToast("O'zingizga kerakli <b>HAMMA</b> mahsulotni tanlagan bo'lgandan so'ng tepadagi savatcha ustiga bosib buyurtma bering!");
         }
 
@@ -888,7 +884,12 @@
 
             saveToLocal();
             resetForm();
+            
+            // --- TUZATILDI: Avtomatik yangilash va "Barchasi"ga o'tish ---
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('nav-btn-all').classList.add('active');
             renderProducts('all');
+            
             switchAdminTab('products');
         }
 
@@ -975,11 +976,22 @@
 
         function closeModal(id) {
             document.getElementById(id).style.display = 'none';
+            // Admin paneli yopilganda ekranni yangilaymiz
+            if (id === 'admin-panel-modal') {
+                renderProducts('all');
+                document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById('nav-btn-all').classList.add('active');
+            }
         }
         
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = "none";
+                if (event.target.id === 'admin-panel-modal') {
+                    renderProducts('all');
+                    document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+                    document.getElementById('nav-btn-all').classList.add('active');
+                }
             }
         }
     </script>
