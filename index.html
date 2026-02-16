@@ -393,6 +393,34 @@
             font-size: 1.2rem;
         }
 
+        /* POPUP XABARNOMA (TOAST) STILI */
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(6, 40, 30, 0.95);
+            color: var(--gold);
+            padding: 15px 25px;
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            z-index: 3000;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            animation: fadeInOut 5s forwards;
+            width: 90%;
+            max-width: 400px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 20px); }
+            10% { opacity: 1; transform: translate(-50%, 0); }
+            80% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); pointer-events: none; }
+        }
+
     </style>
 </head>
 <body>
@@ -547,7 +575,6 @@
         // --- MA'LUMOTLAR BAZASI ---
         const ADMIN_PASS = "aliigoldn1";
         
-        // Asosiy rasm o'zgaruvchisi (yuklangan rasm shu yerda turadi)
         let currentImageBase64 = "";
 
         let products = JSON.parse(localStorage.getItem('alii_products')) || [
@@ -619,31 +646,24 @@
             return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
         }
 
-        // --- RASM YUKLASH VA KICHRAYTIRISH (SIQISH) ---
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Rasmni kichraytirish (Canvas yordamida)
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    
-                    // Maksimal o'lcham (juda katta bo'lmasligi uchun)
                     const maxWidth = 500;
                     const scaleSize = maxWidth / img.width;
                     canvas.width = maxWidth;
                     canvas.height = img.height * scaleSize;
 
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
-                    // Sifatni 70% ga tushirish (xotirani tejash uchun)
                     currentImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
                     
-                    // Preview ko'rsatish
                     const preview = document.getElementById('img-preview');
                     preview.src = currentImageBase64;
                     preview.style.display = 'inline-block';
@@ -653,13 +673,31 @@
             reader.readAsDataURL(file);
         }
 
-        // --- SAVAT FUNKSIYALARI ---
+        // --- YANGI XABARNOMA FUNKSIYASI ---
+        function showToast(message) {
+            // Agar oldin chiqqan xabar bo'lsa o'chiramiz
+            const existing = document.querySelector('.toast-notification');
+            if(existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+
+            // 5 sekunddan keyin o'chadi
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // --- SAVATGA QO'SHISH (O'ZGARTIRILDI) ---
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             cart.push(product);
             saveToLocal();
             updateCartCount();
             
+            // Tugmani vizual o'zgartirish
             const btn = event.target;
             const originalText = btn.innerText;
             btn.innerText = "Qo'shildi ✓";
@@ -668,6 +706,9 @@
                 btn.innerText = originalText;
                 btn.style.background = "";
             }, 1000);
+
+            // YANGI XABARNOMA CHIQARISH
+            showToast("O'zingizga kerakli <b>HAMMA</b> mahsulotni tanlagan bo'lgandan so'ng tepadagi savatcha ustiga bosib buyurtma bering!");
         }
 
         function updateCartCount() {
@@ -792,7 +833,6 @@
             }
         }
 
-        // 1. Mahsulotlarni boshqarish (List)
         function renderAdminProducts() {
             const list = document.getElementById('admin-products-list');
             list.innerHTML = '';
@@ -816,7 +856,6 @@
             });
         }
 
-        // 2. Mahsulotni Tahrirlash/Qo'shish Logikasi (FIXED)
         function handleProductSubmit(e) {
             e.preventDefault();
             const editId = document.getElementById('edit-id').value;
@@ -824,14 +863,11 @@
             const price = document.getElementById('prod-price').value;
             const cat = document.getElementById('prod-cat').value;
             
-            // Asosiy rasm mantig'i:
-            let imgToSave = 'https://via.placeholder.com/400x400?text=No+Image'; // Agar hech narsa bo'lmasa
+            let imgToSave = 'https://via.placeholder.com/400x400?text=No+Image';
 
             if (currentImageBase64 && currentImageBase64.length > 100) {
-                // 1. Agar yangi rasm yuklangan bo'lsa (yangi yoki o'zgargan)
                 imgToSave = currentImageBase64;
             } else if (editId) {
-                // 2. Tahrirlash payti va rasm o'zgarmagan bo'lsa -> Bazadagi eski rasmni topamiz
                 const existing = products.find(p => p.id == editId);
                 if (existing) {
                     imgToSave = existing.image;
@@ -839,14 +875,12 @@
             }
 
             if (editId) {
-                // Tahrirlash (Update)
                 const index = products.findIndex(p => p.id == editId);
                 if (index !== -1) {
                     products[index] = { ...products[index], name, price, category: cat, image: imgToSave };
                     alert("Mahsulot yangilandi!");
                 }
             } else {
-                // Yangi qo'shish (Add)
                 const newProd = { id: Date.now(), name, price, category: cat, image: imgToSave };
                 products.push(newProd);
                 alert("Mahsulot qo'shildi!");
@@ -862,18 +896,15 @@
             const product = products.find(p => p.id === id);
             if (!product) return;
 
-            // Formani to'ldirish
             document.getElementById('edit-id').value = product.id;
             document.getElementById('prod-name').value = product.name;
             document.getElementById('prod-price').value = product.price;
             document.getElementById('prod-cat').value = product.category;
             
-            // Previewni o'rnatish
-            currentImageBase64 = ""; // Reset qilamiz, toki yangi yuklamasa eskisi qolsin
+            currentImageBase64 = ""; 
             document.getElementById('img-preview').src = product.image;
             document.getElementById('img-preview').style.display = 'inline-block';
 
-            // UI ni o'zgartirish
             document.getElementById('form-title').innerText = "Mahsulotni tahrirlash";
             const btn = document.getElementById('form-submit-btn');
             btn.innerText = "Saqlash";
@@ -890,7 +921,6 @@
             btn.innerText = "Bazaga qo'shish";
             btn.classList.remove('update');
             
-            // Rasmni tozalash
             currentImageBase64 = "";
             document.getElementById('img-preview').src = "";
             document.getElementById('img-preview').style.display = 'none';
@@ -905,7 +935,6 @@
             }
         }
 
-        // 3. Buyurtmalar
         function renderAdminOrders() {
             const container = document.getElementById('admin-orders-list');
             container.innerHTML = '';
